@@ -2,3 +2,6 @@
 .vscode
 collections/*
 roles/*
+.ansible
+.bash_history
+.proxy

@@ -43,7 +43,6 @@ ARG USER_GID=1000
 ARG DOCKER_GID=142
 ARG VIRTUAL_ENV="/app/.venv"
 ARG WORKDIR="/app/demo-molecule"
-# shadow => commandes groupadd...
 ARG PACKAGES="bash sudo docker git openssh-client ca-certificates curl net-tools shadow vim unzip tar jq"
 
 ENV VIRTUAL_ENV="$VIRTUAL_ENV" \

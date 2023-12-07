@@ -2,11 +2,18 @@
 
 DOCKER_IMAGE=demo-molecule:1.0.0
 
+function _install_poetry() {
+  curl -sSL https://install.python-poetry.org | python3 -
+  bin_path=$HOME/.local/bin
+  if [ -n "${PATH##*${bin_path}}" ] && [ -n "${PATH##*${bin_path}:*}" ]; then
+      export PATH="$PATH:${bin_path}"
+  fi
+}
+
 # Initialisation des variables d'environnement
 function _set_vars_env() {
-  # On récupère l'adresse ip du host
-  interface=$( ip -br l | awk '$1 !~ "lo|vir|wl|br|docker|veth" { print $1}' )
-  host_ip=$( ip -f inet addr show $interface | sed -En -e 's/.*inet ([0-9.]+).*/\1/p' )
+  # Variables d'environnement du proxy
+  if [ -f .proxy ]; then source .proxy; fi
   # ID/GID du user connecté
   USER_ID=$(id -u)
   USER_GID=$(id -g)
@@ -21,7 +28,10 @@ function _set_vars_env() {
 function _build_configuration_docker() {
   command=""
   image_exist=$(docker images "$DOCKER_IMAGE" --format "{{.ID}}")
-  build_args="--build-arg USER_ID=\"${USER_ID}\" \
+  build_args="--build-arg http_proxy=\"${http_proxy}\" \
+     --build-arg https_proxy=\"${https_proxy}\" \
+     --build-arg no_proxy=\"${no_proxy}\" \
+     --build-arg USER_ID=\"${USER_ID}\" \
      --build-arg USER_GID=\"${USER_GID}\" \
      --build-arg DOCKER_GID=\"${DOCKER_GID}\""
   if [ "$1" = "--force" ]; then
@@ -40,6 +50,13 @@ function _build_configuration_docker() {
 # Installation de l'environnement ansible
 function build_env() {
   echo "===> Installation de l'environnement"
+  # Check poetry.lock
+  if [ ! -f poetry.lock ]; then
+    if ! command -v poetry &> /dev/null; then
+      _install_poetry
+    fi
+    poetry install
+  fi
   # Variables d'environnement
   _set_vars_env
   # Construction de l'image docker python avec ansible et molecule
