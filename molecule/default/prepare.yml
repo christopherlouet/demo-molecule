@@ -1,0 +1,8 @@
+---
+- name: Prepare demo-molecule
+  hosts: all
+  become: true
+  tasks:
+    - name: "Include Nginx"
+      ansible.builtin.import_role:
+        name: demo_nginx

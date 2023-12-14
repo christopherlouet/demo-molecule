@@ -1,0 +1,40 @@
+---
+- name: Ensure nginx is at the latest version
+  ansible.builtin.package: name=nginx state=present
+
+- name: Ensure directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+  loop:
+    - "/www"
+
+- name: Copy http error file
+  ansible.builtin.copy:
+    src: "50x.html"
+    dest: "/www/50x.html"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Copy configuration templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop:
+    - { src: "default.conf.j2", dest: "/etc/nginx/http.d/default.conf" }
+    - { src: "index.html.j2", dest: "/www/index.html" }
+
+- name: Stop nginx
+  command: nginx -s stop
+  ignore_errors: yes
+  no_log: true
+
+- name: Start nginx
+  command: nginx

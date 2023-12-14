@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-DOCKER_IMAGE=demo-molecule:1.0.0
+DOCKER_IMAGE_PROJECT=demo-molecule:1.0.0
+DOCKER_IMAGE_MOLECULE=molecule-alpine:1.0.0
+CONTAINER_NAME=demo_molecule
 
+# Installation de Poetry
 function _install_poetry() {
   curl -sSL https://install.python-poetry.org | python3 -
   bin_path=$HOME/.local/bin
@@ -10,10 +13,21 @@ function _install_poetry() {
   fi
 }
 
+ # Initialisation de Poetry
+_init_poetry() {
+  # Check poetry.lock
+  if [ ! -f poetry.lock ]; then
+    if ! command -v poetry &> /dev/null; then
+      _install_poetry
+    fi
+    poetry install
+  fi
+}
+
 # Initialisation des variables d'environnement
 function _set_vars_env() {
   # Variables d'environnement du proxy
-  if [ -f .proxy ]; then source .proxy; fi
+  [[ -f .proxy ]] && source .proxy && export {http,https,ftp}_proxy
   # ID/GID du user connecté
   USER_ID=$(id -u)
   USER_GID=$(id -g)
@@ -24,63 +38,74 @@ function _set_vars_env() {
   export DOCKER_GID
 }
 
-# Construction de l'image docker demo-molecule
-function _build_configuration_docker() {
-  command=""
-  image_exist=$(docker images "$DOCKER_IMAGE" --format "{{.ID}}")
+# Générer les arguments
+_build_docker_args() {
   build_args="--build-arg http_proxy=\"${http_proxy}\" \
-     --build-arg https_proxy=\"${https_proxy}\" \
-     --build-arg no_proxy=\"${no_proxy}\" \
-     --build-arg USER_ID=\"${USER_ID}\" \
-     --build-arg USER_GID=\"${USER_GID}\" \
-     --build-arg DOCKER_GID=\"${DOCKER_GID}\""
-  if [ "$1" = "--force" ]; then
-    if [ -n "$image_exist" ]; then docker image rm "$DOCKER_IMAGE"; fi
-    command="DOCKER_BUILDKIT=1 \
-    docker build -f Dockerfile --no-cache --target=runtime $build_args -t=$DOCKER_IMAGE ."
-  else
-    if [ -z "$image_exist" ]; then
-      command="DOCKER_BUILDKIT=1 \
-      docker build -f Dockerfile --target=runtime $build_args -t=$DOCKER_IMAGE ."
-    fi
-  fi
-  if [ -n "$command" ]; then eval "$command"; fi
+       --build-arg https_proxy=\"${https_proxy}\" \
+       --build-arg no_proxy=\"${no_proxy}\" \
+       --build-arg USER_ID=\"${USER_ID}\" \
+       --build-arg USER_GID=\"${USER_GID}\" \
+       --build-arg DOCKER_GID=\"${DOCKER_GID}\""
+}
+
+# Construction d'une image docker
+function _build_image_docker() {
+  local docker_file=$1
+  local image_tag=$2
+  local build_args=$3
+  local target=$4
+  local force=${5:-0}
+  local command="DOCKER_BUILDKIT=1 docker build -f $docker_file -t=$image_tag $build_args"
+  [[ -n $target ]] && command+=" --target=$target"
+  [[ "$force" -eq 1 ]] && docker image rm "$image_tag" 2>/dev/null && command+=" --no-cache"
+  command+=" ."
+  image_id=$(docker images "$image_tag" --format "{{.ID}}")
+  [[ -z "$image_id" ]] && echo "$command" && eval "$command"
+  return 0
+}
+
+# Construction de l'environnement docker du projet
+function _build_docker_project() {
+  local force=0 && [[ $1 == "--force" ]] && force=1
+  _build_docker_args
+  _build_image_docker "Dockerfile" "$DOCKER_IMAGE_PROJECT" "$build_args" "runtime" $force
+}
+
+# Construction de l'environnement docker de molecule
+function _build_docker_molecule() {
+  local force=0 && [[ $1 == "--force" ]] && force=1
+  _build_docker_args
+  _build_image_docker "molecule/default/Dockerfile" "$DOCKER_IMAGE_MOLECULE" "$build_args" "" $force
 }
 
 # Installation de l'environnement ansible
 function build_env() {
-  echo "===> Installation de l'environnement"
-  # Check poetry.lock
-  if [ ! -f poetry.lock ]; then
-    if ! command -v poetry &> /dev/null; then
-      _install_poetry
-    fi
-    poetry install
-  fi
+  # Initialisation poetry
+  _init_poetry
   # Variables d'environnement
   _set_vars_env
-  # Construction de l'image docker python avec ansible et molecule
-  _build_configuration_docker "$1"
+#  # Registry Docker
+  _install_docker_registry
+#  # Construction des images Docker
+  _build_docker_project "$1"
+  _build_docker_molecule "$1"
 }
 
 # Execution d'une commande dans le container configuration
 function run_env() {
   exec_command="/bin/bash"
-  if [ -n "$1" ] && [ ! "$1" = "--force" ]; then
-    exec_command=$*
-  fi
-  if [ "$(docker ps -a | grep -c configuration)" -gt 0 ]; then
-    docker exec -it configuration bash
+  [[ -n "$1" ]] && ! [[ "$1" = "--force" ]] && exec_command=$*
+  if [ "$(docker ps -a | grep -c $CONTAINER_NAME)" -gt 0 ]; then
+    docker exec -it $CONTAINER_NAME bash
   else
-    command="docker run --rm -it --name demo-molecule --privileged \
+    command="docker run --rm -it --name $CONTAINER_NAME --hostname $CONTAINER_NAME --network host --privileged \
       -v /var/run/docker.sock:/var/run/docker.sock:rw \
       -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-      -w=/app/demo-molecule \
       -v ${PWD}:/app/demo-molecule \
-      -e ENV=$ENV \
-      $DOCKER_IMAGE $exec_command"
-    echo "$command"
-    eval "$command"
+      -w=/app/demo-molecule"
+    [[ -f .proxy ]] && command="$command --env-file .proxy"
+    command="$command $DOCKER_IMAGE_PROJECT $exec_command"
+    echo "$command" && eval "$command"
   fi
 }
 

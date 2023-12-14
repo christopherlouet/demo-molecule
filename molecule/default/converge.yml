@@ -1,0 +1,26 @@
+---
+- name: Converge Test 01
+  hosts: test_01
+  become: true
+  tasks:
+    - name: "Include Nginx"
+      debug:
+        msg: "test"
+
+#- name: Converge Test 02
+#  hosts: test_02
+#  become: true
+#  tasks:
+#    - name: Converge JSCM
+#      when: molecule_install_jscm
+#      block:
+#      - name: "Include Docker"
+#        ansible.builtin.import_role:
+#          name: novae_docker
+#        tags:
+#          - docker
+#      - name: "Include Jalios"
+#        ansible.builtin.import_role:
+#          name: novae_jalios
+#        tags:
+#          - jalios

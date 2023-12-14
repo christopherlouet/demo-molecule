@@ -1,0 +1,87 @@
+---
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+    role-file: requirements.yml
+    requirements-file: requirements.yml
+driver:
+  name: docker
+platforms:
+  - name: molecule_image_01
+    image: "molecule-alpine:1.0.0"
+    pre_build_image: true
+    env:
+      http_proxy: "${http_proxy}"
+      https_proxy: "${https_proxy}"
+      no_proxy: "${no_proxy}"
+    docker_networks:
+      - name: demo_molecule
+        ipam_config:
+          - subnet: '10.3.2.0/24'
+            gateway: '10.3.2.254'
+    networks:
+      - name: demo_molecule
+    published_ports:
+      - 0.0.0.0:8080:80 # nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    groups:
+      - molecule
+      - test_01
+  - name: molecule_image_02
+    image: "molecule-alpine:1.0.0"
+    pre_build_image: true
+    env:
+      http_proxy: "${http_proxy}"
+      https_proxy: "${https_proxy}"
+      no_proxy: "${no_proxy}"
+    docker_networks:
+      - name: demo_molecule
+        ipam_config:
+          - subnet: '10.3.2.0/24'
+            gateway: '10.3.2.254'
+    networks:
+      - name: demo_molecule
+    published_ports:
+      - 0.0.0.0:8090:80 # nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    groups:
+      - molecule
+      - test_02
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_VERBOSITY: 1
+    ANSIBLE_KEEP_REMOTE_FILES: 0
+    ANSIBLE_ROLES_PATH: "../../roles:../../roles.internal"
+    ANSIBLE_COLLECTIONS_PATH: "../../collections"
+  config_options:
+    defaults:
+      callbacks_enabled: profile_tasks, timer
+      roles_path: "roles:roles.internal"
+      collections_paths: "collections"
+  options:
+    skip-tags: molecule-docker-notest, notest
+scenario:
+  name: default
+  converge_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+  create_sequence:
+    - dependency
+    - create
+    - prepare
+  destroy_sequence:
+    - destroy
+verifier:
+  name: ansible

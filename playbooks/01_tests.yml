@@ -1,0 +1,7 @@
+---
+- hosts: demo
+  become: true
+  gather_facts: true
+  tasks:
+    - ansible.builtin.import_role:
+        name: "nginx"

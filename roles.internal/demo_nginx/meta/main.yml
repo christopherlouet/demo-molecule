@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  role_name: demo_nginx
+  description: Demo Nginx
+  min_ansible_version: "2.1"
+  license: "MIT"
+  platforms:
+    - name: EL
+      versions:
+        - all
+  galaxy_tags:
+    - nginx
