@@ -7,3 +7,7 @@ roles/*
 .proxy
 .bash_history
 .viminfo
+.ipynb_checkpoints
+.ipython
+.jupyter
+.local

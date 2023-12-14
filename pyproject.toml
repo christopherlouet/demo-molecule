@@ -16,6 +16,7 @@ jmespath = "^1.0.1"
 molecule = "^6.0.2"
 molecule-plugins = {extras = ["docker"], version = "^23.5.0"}
 testinfra = "^6.0.0"
+jupyterlab = "^4.0.9"
 
 [build-system]
 requires = ["poetry-core"]

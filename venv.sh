@@ -84,8 +84,6 @@ function build_env() {
   _init_poetry
   # Variables d'environnement
   _set_vars_env
-#  # Registry Docker
-  _install_docker_registry
 #  # Construction des images Docker
   _build_docker_project "$1"
   _build_docker_molecule "$1"
