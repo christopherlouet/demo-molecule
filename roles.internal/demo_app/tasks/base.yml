@@ -1,0 +1,23 @@
+---
+- name: Creation of the systemd-journal group
+  ansible.builtin.group:
+    name: systemd-journal
+    state: present
+
+- name: Creation of the app group
+  ansible.builtin.group:
+    name: app
+    state: present
+
+- name: Creation of the app user
+  ansible.builtin.user:
+    name: app
+    group: app
+
+- name: Copy of the user's bashrc
+  ansible.builtin.template:
+    src: bashrc.j2
+    dest: "/home/app/.bashrc"
+    owner: app
+    group: app
+    mode: '0644'

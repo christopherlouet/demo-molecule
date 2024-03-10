@@ -1,0 +1,86 @@
+---
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+    role-file: requirements.yml
+    requirements-file: requirements.yml
+driver:
+  name: docker
+platforms:
+  - name: demo_01
+    image: "molecule-rocky8.8:1.0.0"
+    pre_build_image: true
+    privileged: true
+    cgroupns_mode: host
+    networks:
+      - name: demo_molecule
+    docker_networks:
+      - name: demo_molecule
+        ipam_config:
+          - subnet: '10.3.2.0/24'
+            gateway: '10.3.2.254'
+    published_ports:
+      - 0.0.0.0:8080:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    groups:
+      - molecule
+      - demo
+    command: /usr/sbin/init
+  - name: demo_02
+    image: "molecule-ubuntu22.04:1.0.0"
+    pre_build_image: true
+    privileged: true
+    cgroupns_mode: host
+    networks:
+      - name: demo_molecule
+    docker_networks:
+      - name: demo_molecule
+        ipam_config:
+          - subnet: '10.3.2.0/24'
+            gateway: '10.3.2.254'
+    published_ports:
+      - 0.0.0.0:8090:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    groups:
+      - molecule
+      - demo
+    command: /usr/sbin/init
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_VERBOSITY: 1
+    ANSIBLE_KEEP_REMOTE_FILES: 0
+    ANSIBLE_ROLES_PATH: "../../roles:../../roles.internal"
+    ANSIBLE_COLLECTIONS_PATH: "../../collections"
+  config_options:
+    defaults:
+      callbacks_enabled: profile_tasks, timer
+      roles_path: "roles:roles.internal"
+      collections_paths: "collections"
+  options:
+    skip-tags: molecule-docker-notest, notest
+  inventory:
+    links:
+      group_vars: ../../inventories/group_vars/
+      host_vars: ../../inventories/host_vars/
+scenario:
+  name: default
+  converge_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+  create_sequence:
+    - dependency
+    - create
+    - prepare
+  destroy_sequence:
+    - destroy
+verifier:
+  name: testinfra

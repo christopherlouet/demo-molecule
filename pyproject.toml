@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "demo-molecule"
+version = "1.0.0"
+description = "A demonstration project to initialize a Docker environment with Ansible Molecule"
+authors = ["Christopher LOUËT"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+setuptools = "^69.1.1"
+ansible-core = "^2.16.4"
+ansible-lint = { version = "^24.2.0", markers = "platform_system != 'Windows'" }
+jmespath = "^1.0.1"
+
+[tool.poetry.group.molecule]
+[tool.poetry.group.molecule.dependencies]
+molecule = "^24.2.0"
+molecule-plugins = {extras = ["docker"], version = "^23.5.3"}
+
+[tool.poetry.group.test]
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.2"
+pytest-testinfra = "^10.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

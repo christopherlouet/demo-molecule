@@ -1,0 +1,26 @@
+# php/fastcgi
+server {
+    listen       80;
+    server_name  {{ app_name }};
+    root         /usr/share/nginx/html;
+
+    access_log /var/log/nginx/{{ app_name }}-access.log;
+    error_log  /var/log/nginx/{{ app_name }}-error.log error;
+
+    location / {
+        index index.php index.html index.htm;
+        try_files $uri $uri/ /index.php$is_args$args =404;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_pass unix:{{ php_fpm_listen }};
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}

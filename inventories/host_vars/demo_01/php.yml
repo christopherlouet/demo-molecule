@@ -1,0 +1,3 @@
+---
+php_fpm_listen: "/run/php-fpm/www.sock"
+php_fpm_daemon: php-fpm

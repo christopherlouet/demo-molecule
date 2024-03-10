@@ -1,0 +1,7 @@
+---
+aliases:
+  - {alias: "ls", command: "ls ", color: True}
+  - {alias: "ll", command: "ls -alF", color: False}
+  - {alias: "la", command: "ls -A", color: False}
+  - {alias: "l", command: "ls -CF", color: False}
+  - {alias: "lz", command: "ls -Z", color: False}

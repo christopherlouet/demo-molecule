@@ -1,0 +1,34 @@
+---
+- name: Installing demo_01
+  hosts: demo_01
+  become: true
+  tasks:
+    - name: Installing Nginx
+      ansible.builtin.import_role:
+        name: demo_app
+        tasks_from: nginx
+      tags:
+        - nginx
+    - name: Installing php
+      ansible.builtin.import_role:
+        name: demo_app
+        tasks_from: php
+      tags:
+        - php
+
+- name: Installing demo_02
+  hosts: demo_02
+  become: true
+  tasks:
+    - name: Installing Nginx
+      ansible.builtin.import_role:
+        name: demo_app
+        tasks_from: nginx
+      tags:
+        - nginx
+    - name: Installing php
+      ansible.builtin.import_role:
+        name: demo_app
+        tasks_from: php
+      tags:
+        - php

@@ -1,0 +1,3 @@
+---
+nginx_install_source_openssl: false
+nginx_static_modules: []

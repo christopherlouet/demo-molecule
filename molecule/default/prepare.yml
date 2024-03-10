@@ -1,0 +1,11 @@
+---
+- name: Prepare demo-molecule
+  hosts: all
+  become: true
+  tasks:
+    - name: Installing prerequisites
+      ansible.builtin.import_role:
+        name: demo_app
+        tasks_from: base
+      tags:
+        - base

@@ -1,0 +1,2 @@
+---
+php_fpm_listen: "/run/php/php-fpm.sock"

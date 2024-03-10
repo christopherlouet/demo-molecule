@@ -1,0 +1,10 @@
+.idea
+.vscode
+*.iml
+collections/*
+!collections/.gitkeep
+roles/*
+!roles/.gitkeep
+.cache
+.proxy
+**/__pycache__/

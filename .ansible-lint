@@ -1,0 +1,16 @@
+profile: production
+
+exclude_paths:
+  - .cache/
+  - collections/
+  - inventories/
+  - roles/
+
+parseable: true
+quiet: false
+verbosity: 0
+
+var_naming_pattern: "^[a-z_][a-z0-9_]*$"
+use_default_rules: true
+offline: true
+max_block_depth: 20

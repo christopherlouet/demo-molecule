@@ -1,0 +1,9 @@
+---
+- name: Import Base tasks
+  ansible.builtin.import_tasks: base.yml
+
+- name: Import Nginx tasks
+  ansible.builtin.import_tasks: nginx.yml
+
+- name: Import php tasks
+  ansible.builtin.import_tasks: php.yml

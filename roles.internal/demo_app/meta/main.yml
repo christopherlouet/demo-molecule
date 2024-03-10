@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  role_name: demo_app
+  author: Christopher LOUËT
+  description: A demonstration role to initialize an environment with Ansible Molecule
+  min_ansible_version: "2.1"
+  license: MIT
+  platforms:
+    - name: EL
+      versions:
+        - all
+  galaxy_tags:
+    - demo
+    - molecule
+    - nginx
+    - php
+
+dependencies: []

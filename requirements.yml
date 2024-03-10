@@ -1,0 +1,15 @@
+---
+roles:
+  - name: geerlingguy.php
+    src: https://github.com/geerlingguy/ansible-role-php.git
+    scm: git
+    version: 5.0.1
+  - name: nginxinc.nginx
+    src: https://github.com/nginxinc/ansible-role-nginx.git
+    scm: git
+    version: 0.24.2
+collections:
+  - name: community.general
+    version: 7.4.0
+  - name: ansible.posix
+    version: 1.5.4
