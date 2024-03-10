@@ -1,9 +1,7 @@
 # demo-molecule
 
 <p align="left">
-    <a href="https://github.com/christopherlouet/demo-molecule/actions?query=workflow%3Aansible-lint">
-        <img src="https://github.com/christopherlouet/demo-molecule/workflows/ansible-lint/badge.svg" alt="Build Status">
-    </a>
+    <a href="https://github.com/christopherlouet/demo-molecule/actions?query=workflow%3Aansible-lint"><img src="https://github.com/christopherlouet/demo-molecule/workflows/ansible-lint/badge.svg" alt="Build Status"></a>
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="license">
 </p>
 
